@@ -9,25 +9,25 @@ def evaluate(model, dataloader, criterion, device):
     losses = []
     
     with torch.no_grad():
-        for images, questions, labels in tqdm(enumerate(dataloader)):
+        for batch_idx, (images, questions, labels) in tqdm(enumerate(dataloader)):
             images, questions, labels = images.to(device), questions.to(device), labels.to(device)
             outputs = model(images, questions)
             
             loss = criterion(outputs, labels)
-            loss.append(loss.item())
+            losses.append(loss.item())
             
             _, predictions = torch.max(outputs.data, 1)
             
             total += labels.size(0)
             correct += (predictions == labels).sum().item()
             
-    loss = sum(losses) / len(losses)
+    val_loss = sum(losses) / len(losses)
     
     print(f"Validate loss: {loss:4f}")
     
-    acc = correct / total
+    val_acc = correct / total
     
-    return loss, acc
+    return val_loss, val_acc
 
 
 def train_one_epoch(model, dataloader, criterion, optimizer, device='cpu'):
@@ -59,13 +59,13 @@ def train_one_epoch(model, dataloader, criterion, optimizer, device='cpu'):
 
 
 
-def fit(model, train_loader, val_loade, criterion, optimizer, scheduler, device, epochs):
+def fit(model, train_loader, val_loader, criterion, optimizer, scheduler, device, epochs):
     train_losses = []
     val_losses = []
     
-    for epoch in range(epochs):
+    for epoch in tqdm(range(epochs)):
         train_loss = train_one_epoch(model, train_loader, criterion, optimizer, device)
-        val_loss, val_acc = evaluate(model, val_loade, criterion, device)
+        val_loss, val_acc = evaluate(model, val_loader, criterion, device)
         
         train_losses.append(train_loss)
         val_losses.append(val_loss)

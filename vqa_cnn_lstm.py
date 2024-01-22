@@ -47,6 +47,9 @@ train_dataset = CNN_LSTM_Dataset(train_data, classes_to_idx, text_tokenizer, tra
 val_dataset = CNN_LSTM_Dataset(val_data, classes_to_idx, text_tokenizer, transform=transform)
 test_dataset = CNN_LSTM_Dataset(test_data, classes_to_idx, text_tokenizer, transform=transform)
 
+image, question, label = next(iter(train_dataset))
+print(image.shape, question.shape, label.shape)
+
 # create dataloaders
 TRAIN_BATCH_SIZE = 128
 TEST_BATCH_SIZE = 32
@@ -68,7 +71,7 @@ hidden_size = 128
 n_layers = 1
 embedding_dim = 128
 
-device = 'cuda:2'
+device = 'cuda:3'
 model = resnet_lstm.Resnet_BiLSTM(n_classes=len(classes), 
                                  vocab_length=len(vocab),
                                  img_model_name='resnet50',
