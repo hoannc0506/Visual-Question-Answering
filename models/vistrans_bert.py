@@ -49,9 +49,7 @@ class Classifier(nn.Module):
         self.fc = nn.Linear(hidden_size*2, n_classes)
         
     def forward(self, x):
-        x, _ = self.lstm(x)
-        x = x[:, -1, :]
-        
+        x, _ = self.lstm(x) 
         x = self.dropout(x)
         x = self.fc(x)
         
@@ -92,10 +90,20 @@ class VisTrans_RoBERTa(nn.Module):
     
 if __name__ == '__main__':
     import torchinfo
-    model = VisTrans_RoBERTa(n_classes=2, vocab_length=1000)
+    n_classes = 2
+    hidden_size = 1024
+    n_layers = 1
+    device = "cuda:2"
+
+    model = VisTrans_RoBERTa(hidden_size=hidden_size,
+                            n_layers=n_layers,
+                            n_classes=n_classes)
+
+    model = model.to(device)
+    model.freeze()
     
-        # Specify input sizes for both img and text
+    # Specify input sizes for both img and text
     img_input_size = (1, 3, 224, 224)  # Assuming input size of (batch_size, channels, height, width)
-    text_input_size = (1, 30)  # Assuming input size of (batch_size, sequence_length)
+    text_input_size = (1, 20) # Assuming input size of (batch_size, sequence_length)
     
     torchinfo.summary(model, input_size=[img_input_size, text_input_size])

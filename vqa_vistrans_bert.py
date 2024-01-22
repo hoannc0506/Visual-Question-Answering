@@ -62,6 +62,7 @@ model = VisTrans_RoBERTa(hidden_size=hidden_size,
                          n_classes=n_classes)
 
 model = model.to(device)
+model.freeze()
 
 lr = 1e-2
 epochs = 50

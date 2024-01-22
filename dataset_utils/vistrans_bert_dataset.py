@@ -11,7 +11,6 @@ class VisTrans_BERT_Dataset(Dataset):
         classes_to_idx,
         image_preprocessor,
         text_tokenizer,
-        device,
         max_seq_length=20,
         image_root="dataset/val2014-resised"):
         
@@ -22,7 +21,6 @@ class VisTrans_BERT_Dataset(Dataset):
         self.max_seq_length = max_seq_length
         self.image_preprocessor = image_preprocessor
         self.text_tokenizer = text_tokenizer
-        self.device = device
         
     def __len__(self):
         return len(self.data)
@@ -31,9 +29,9 @@ class VisTrans_BERT_Dataset(Dataset):
         img_path = os.path.join(self.image_root, self.data[index].get('image_path'))
         image = Image.open(img_path)
         
-        if self.img_feature_extractor:
+        if self.image_preprocessor:
             img = self.image_preprocessor(images=image, return_tensors="pt")
-            img = img.pixel_values.squeeze(0).to(self.device)
+            img = img.pixel_values.squeeze(0)
             
         question = self.data[index].get('question')
         if self.text_tokenizer:
@@ -45,12 +43,12 @@ class VisTrans_BERT_Dataset(Dataset):
                 return_tensors="pt"
                 )
             
-            question = question.input_ids.squeeze(0).to(self.device)
+            question = question.input_ids.squeeze(0)
             
         label = self.data[index].get('answer')
         label = torch.tensor(
             self.classes_to_idx[label],
             dtype=torch.long,
-        ).to(self.device)
+        )
         
         return img, question, label
