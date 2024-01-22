@@ -1,5 +1,5 @@
 # %%
-from transformers import ViTImageProcessor, ViTForImageClassification
+from transformers import ViTImageProcessor, ViTForImageClassification, ViTModel
 from transformers import AutoTokenizer, RobertaModel
 import torchinfo
 from PIL import Image
@@ -10,7 +10,8 @@ import torch
 # %%
 image_processor = ViTImageProcessor.from_pretrained("google/vit-base-patch16-224")
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-model = ViTForImageClassification.from_pretrained("google/vit-base-patch16-224")
+# model = ViTForImageClassification.from_pretrained("google/vit-base-patch16-224")
+model = ViTModel.from_pretrained("google/vit-base-patch16-224")
 model = model.to(device)
 print(torchinfo.summary(model, input_size=(1,3,224,224)))
 
