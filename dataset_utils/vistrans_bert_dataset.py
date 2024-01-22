@@ -33,7 +33,7 @@ class VisTrans_BERT_Dataset(Dataset):
         
         if self.img_feature_extractor:
             img = self.image_preprocessor(images=image, return_tensors="pt")
-            img = {k: v.to(self.device).squeeze(0) for k, v in img.items()}
+            img = img.pixel_values.squeeze(0).to(self.device)
             
         question = self.data[index].get('question')
         if self.text_tokenizer:
@@ -44,8 +44,8 @@ class VisTrans_BERT_Dataset(Dataset):
                 truncation=True,
                 return_tensors="pt"
                 )
-            question = question.input_ids
-            question = {k: v.to(self.device).squeeze(0) for k, v in question.items()}
+            
+            question = question.input_ids.squeeze(0).to(self.device)
             
         label = self.data[index].get('answer')
         label = torch.tensor(
@@ -53,8 +53,4 @@ class VisTrans_BERT_Dataset(Dataset):
             dtype=torch.long,
         ).to(self.device)
         
-        sample = {'images': img,
-                  'question': question,
-                  'label': label}
-        
-        return sample
+        return img, question, label

@@ -6,11 +6,11 @@ import matplotlib.pyplot as plt
 
 import utils
 from torch.utils.data import DataLoader
-from dataset_utils.cnn_lstm_dataset import CNN_LSTM_Dataset
+from dataset_utils.vistrans_bert_dataset import VisTrans_BERT_Dataset
 
 from models.vistrans_bert import VisTrans_RoBERTa
-from transformers import ViTImageProcessor, ViTModel
-from transformers import AutoTokenizer, RobertaModel
+from transformers import ViTImageProcessor
+from transformers import AutoTokenizer
 
 import trainer as trainer
 
@@ -31,11 +31,12 @@ idx_to_classes = {idx:cls_name for idx, cls_name in enumerate(classes)}
 # create tokenizer, preprocessor
 text_tokenizer = AutoTokenizer.from_pretrained("roberta-base")
 image_preprocessor = ViTImageProcessor.from_pretrained("google/vit-base-patch16-224")
+device = 'cuda:2'
 
 # create datasets
-train_dataset = CNN_LSTM_Dataset(train_data, classes_to_idx, text_tokenizer, transform=transform)
-val_dataset = CNN_LSTM_Dataset(val_data, classes_to_idx, text_tokenizer, transform=transform)
-test_dataset = CNN_LSTM_Dataset(test_data, classes_to_idx, text_tokenizer, transform=transform)
+train_dataset = VisTrans_BERT_Dataset(train_data, classes_to_idx, image_preprocessor, text_tokenizer)
+val_dataset = VisTrans_BERT_Dataset(val_data, classes_to_idx, image_preprocessor, text_tokenizer)
+test_dataset = VisTrans_BERT_Dataset(test_data, classes_to_idx, image_preprocessor, text_tokenizer)
 
 # create dataloaders
 TRAIN_BATCH_SIZE = 128
@@ -53,20 +54,13 @@ print(image.shape, question.shape, label.shape)
 
 # define models
 n_classes = len(classes)
-img_model_name = 'resnet50'
-hidden_size = 128
+hidden_size = 1024
 n_layers = 1
-embedding_dim = 128
 
-device = 'cuda:2'
-model = resnet_lstm.Resnet_BiLSTM(n_classes=len(classes), 
-                                 vocab_length=len(vocab),
-                                 img_model_name='resnet50',
-                                 embed_dim=128,
-                                 lstm_num_layers=1,
-                                 lstm_hidden_size=128,
-                                 dropout_prob=0.2
-                                 )
+model = VisTrans_RoBERTa(hidden_size=hidden_size,
+                         n_layers=n_layers,
+                         n_classes=n_classes)
+
 model = model.to(device)
 
 lr = 1e-2
@@ -83,7 +77,7 @@ train_losses, val_losses = trainer.fit(model, train_loader, val_loader, criterio
                                          optimizer, scheduler, device, epochs)
 
 df = pd.DataFrame({'train_loss': train_losses, 'val_loss': val_losses})
-df.to_csv("logs/cnn_lstm_results.csv", index=False)
+df.to_csv("logs/vistrans_roberta_results.csv", index=False)
 
 val_loss, val_acc = trainer.evaluate(model, val_loader, criterion, device)
 

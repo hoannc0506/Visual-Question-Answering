@@ -1,13 +1,94 @@
 import torch 
 import torch.nn as nn
+from transformers import ViTModel
+from transformers import RobertaModel
+
+class VisualEncoder(nn.Module):
+    def __init__(self):
+        super(VisualEncoder, self).__init__()
+        self.model =  ViTModel.from_pretrained("google/vit-base-patch16-224")
+        
+    
+    def forward(self, x):
+        outputs = self.model(x)
+        return outputs.pooler_output
+        
+    
+class TextEncoder(nn.Module):
+    def __init__(self):
+        super(TextEncoder, self).__init__()
+        self.model =  RobertaModel.from_pretrained("roberta-base")
+    
+    def forward(self, x):
+        outputs = self.model(x)
+        return outputs.pooler_output
+
+
+class Classifier(nn.Module):
+    def __init__(self, 
+                 hidden_size=512,
+                 n_layers=1,
+                 dropout_prob=0.2,
+                 n_classes=2):
+        super(Classifier, self).__init__()
+        
+        # concat 2 visual and textual encoder outputs
+        lstm_imput_size = 768*2
+        
+        self.lstm = nn.LSTM(
+            input_size=lstm_imput_size,
+            hidden_size=hidden_size,
+            num_layers=n_layers,
+            batch_first=True,
+            bidirectional=True
+            )
+        
+        self.dropout = nn.Dropout(dropout_prob)
+        
+         # bidirectional x2 output hidden_size
+        self.fc = nn.Linear(hidden_size*2, n_classes)
+        
+    def forward(self, x):
+        x, _ = self.lstm(x)
+        x = x[:, -1, :]
+        
+        x = self.dropout(x)
+        x = self.fc(x)
+        
+        return x    
+
 
 class VisTrans_RoBERTa(nn.Module):
-    def __init__(self):
+    def __init__(self, 
+                 hidden_size=512,
+                 n_layers=1,
+                 dropout_prob=0.2,
+                 n_classes=2):
         super(VisTrans_RoBERTa, self).__init__()
-        pass
+        self.visual_encoder = VisualEncoder()
+        self.text_encoder = TextEncoder()
+        
+        self.classifier = Classifier(hidden_size,
+                                     n_layers,
+                                     dropout_prob,
+                                     n_classes)
     
-    def forward(self):
-        pass
+    def forward(self, image, text):
+        text_out = self.text_encoder(text)
+        image_out = self.visual_encoder(image)
+        x = torch.cat((text_out, image_out), dim=1)
+        x = self.classifier(x)
+        
+        return x
+    
+    def freeze(self):
+        # freeze image and text encoders pretrained
+        for n, p in self.visual_encoder.named_parameters():
+            p.requires_grad = False
+        
+        for n, p in self.text_encoder.named_parameters():
+            p.requires_grad = False
+    
     
 if __name__ == '__main__':
     import torchinfo
