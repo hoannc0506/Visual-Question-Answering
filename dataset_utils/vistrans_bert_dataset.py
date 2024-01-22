@@ -9,16 +9,18 @@ class VisTrans_BERT_Dataset(Dataset):
         self,
         data,
         classes_to_idx,
-        img_feature_extractor,
+        image_preprocessor,
         text_tokenizer,
         device,
+        max_seq_length=20,
         image_root="dataset/val2014-resised"):
         
         # data is a list of dict contain 3 keys {'image_path': ,'question':, 'answer': }
         self.data = data
         self.image_root = image_root
         self.classes_to_idx = classes_to_idx
-        self.img_feature_extractor = img_feature_extractor
+        self.max_seq_length = max_seq_length
+        self.image_preprocessor = image_preprocessor
         self.text_tokenizer = text_tokenizer
         self.device = device
         
@@ -30,19 +32,19 @@ class VisTrans_BERT_Dataset(Dataset):
         image = Image.open(img_path)
         
         if self.img_feature_extractor:
-            img = self.img_feature_extractor(images=image, return_tensors="pt")
-            img = {k:v.to(self.device).squeeze(0) for k, v in img.items()}
+            img = self.image_preprocessor(images=image, return_tensors="pt")
+            img = {k: v.to(self.device).squeeze(0) for k, v in img.items()}
             
         question = self.data[index].get('question')
         if self.text_tokenizer:
             question = self.text_tokenizer(
                 question,
                 padding="max_length",
-                max_length=20,
+                max_length=self.max_seq_length,
                 truncation=True,
                 return_tensors="pt"
                 )
-            
+            question = question.input_ids
             question = {k: v.to(self.device).squeeze(0) for k, v in question.items()}
             
         label = self.data[index].get('answer')
