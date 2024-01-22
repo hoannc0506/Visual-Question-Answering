@@ -1,3 +1,4 @@
+import torch
 import torch.nn as nn
 import torchvision.transforms as transforms
 
@@ -5,12 +6,12 @@ import os
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from torch.utils.data import Dataset, DataLoader
-from sklearn.model_selection import train_test_split
+from torch.utils.data import DataLoader
 import utils
 # from utils import eng as eng_spacy_model
 from VQA_datasets import CNN_LSTM_Dataset
 import VQA_models
+import train_val
 import torchinfo
 
 
@@ -84,4 +85,19 @@ weight_decay = 1e-5
 scheduler_step_size = epochs *0.6
 criterion = nn.CrossEntropyLoss()
 
-optimizer = torch.optim.Adam(model.)
+optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
+scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=scheduler_step_size, gamma=0.1)
+
+# train model
+train_losses, val_losses = train_val.fit(model, train_loader, val_loader, criterion, 
+                                         optimizer, scheduler, device, epochs)
+
+df = pd.DataFrame({'train_loss': train_losses, 'val_loss': val_losses})
+df.to_csv("logs/cnn_lstm_results.csv", index=False)
+
+val_loss, val_acc = train_val.evaluate(model, val_loader, criterion, device)
+
+test_loss, test_acc = train_val.evaluate(model, val_loader, criterion, device)
+
+print("Val acc", val_acc)
+print("Test acc", test_acc)
