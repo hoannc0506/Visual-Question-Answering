@@ -13,7 +13,7 @@ from transformers import ViTImageProcessor
 from transformers import AutoTokenizer
 
 import trainer as trainer
-
+import wandb
 
 
 # load data
@@ -31,7 +31,7 @@ idx_to_classes = {idx:cls_name for idx, cls_name in enumerate(classes)}
 # create tokenizer, preprocessor
 text_tokenizer = AutoTokenizer.from_pretrained("roberta-base")
 image_preprocessor = ViTImageProcessor.from_pretrained("google/vit-base-patch16-224")
-device = 'cuda:2'
+device = 'cuda:3'
 
 # create datasets
 train_dataset = VisTrans_BERT_Dataset(train_data, classes_to_idx, image_preprocessor, text_tokenizer)
@@ -73,16 +73,22 @@ criterion = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
 scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=scheduler_step_size, gamma=0.1)
 
+# start a new wandb run to track this script
+wandb_logger = wandb.init(
+    project="VQA",
+    name='VisTrans_RoBERTa'
+)
+
 # train model
 train_losses, val_losses = trainer.fit(model, train_loader, val_loader, criterion, 
-                                         optimizer, scheduler, device, epochs)
+                                         optimizer, scheduler, device, epochs, logger=wandb_logger)
 
 df = pd.DataFrame({'train_loss': train_losses, 'val_loss': val_losses})
 df.to_csv("logs/vistrans_roberta_results.csv", index=False)
 
 val_loss, val_acc = trainer.evaluate(model, val_loader, criterion, device)
 
-test_loss, test_acc = trainer.evaluate(model, val_loader, criterion, device)
+test_loss, test_acc = trainer.evaluate(model, test_loader, criterion, device)
 
 print("Val acc", val_acc)
 print("Test acc", test_acc)
