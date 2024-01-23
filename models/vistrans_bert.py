@@ -21,6 +21,7 @@ class TextEncoder(nn.Module):
     
     def forward(self, x):
         outputs = self.model(x)
+        
         return outputs.pooler_output
 
 

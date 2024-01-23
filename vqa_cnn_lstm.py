@@ -13,7 +13,7 @@ from dataset_utils.cnn_lstm_dataset import CNN_LSTM_Dataset
 import models.resnet_lstm as resnet_lstm
 import trainer as trainer
 import torchinfo
-
+import wandb
 
 # load data
 train_data = utils.load_dataset('dataset/vaq2.0.TrainImages.txt')
@@ -91,16 +91,22 @@ criterion = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
 scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=scheduler_step_size, gamma=0.1)
 
+# start a new wandb run to track this script
+wandb_logger = wandb.init(
+    project="VQA",
+    name='CNN_LSTM'
+)
+
 # train model
 train_losses, val_losses = trainer.fit(model, train_loader, val_loader, criterion, 
-                                         optimizer, scheduler, device, epochs)
+                                         optimizer, scheduler, device, epochs, logger=wandb_logger)
 
 df = pd.DataFrame({'train_loss': train_losses, 'val_loss': val_losses})
 df.to_csv("logs/cnn_lstm_results.csv", index=False)
 
 val_loss, val_acc = trainer.evaluate(model, val_loader, criterion, device)
 
-test_loss, test_acc = trainer.evaluate(model, val_loader, criterion, device)
+test_loss, test_acc = trainer.evaluate(model, test_loader, criterion, device)
 
 print("Val acc", val_acc)
 print("Test acc", test_acc)

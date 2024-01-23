@@ -36,7 +36,7 @@ class Resnet_BiLSTM(nn.Module):
         img_features = self.image_encoder(img)
         
         # Convert 'text' tensor to LongTensor
-        text = text.to(torch.int64)
+        # text = text.to(torch.int64)
         
         text_emb = self.embedding(text)
         
