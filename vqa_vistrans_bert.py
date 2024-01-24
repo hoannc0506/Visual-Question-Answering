@@ -31,7 +31,7 @@ idx_to_classes = {idx:cls_name for idx, cls_name in enumerate(classes)}
 # create tokenizer, preprocessor
 text_tokenizer = AutoTokenizer.from_pretrained("roberta-base")
 image_preprocessor = ViTImageProcessor.from_pretrained("google/vit-base-patch16-224")
-device = 'cuda:3'
+device = 'cuda:2'
 
 # create datasets
 train_dataset = VisTrans_BERT_Dataset(train_data, classes_to_idx, image_preprocessor, text_tokenizer)
@@ -76,7 +76,7 @@ scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=scheduler_step_
 # start a new wandb run to track this script
 wandb_logger = wandb.init(
     project="VQA",
-    name='VisTrans_RoBERTa'
+    name='VisTrans_RoBERTa_hidden_state'
 )
 
 # train model
