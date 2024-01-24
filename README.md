@@ -5,7 +5,7 @@
 
 ## Pipeline
 
-![Pipeline](https://www.researchgate.net/publication/328128164/figure/fig1/AS:678896051687424@1538872840192/Visual-Question-Answering-Common-Approach-Fig1-indicates-the-steps-of-VQA-approach-at.png)
+![Pipeline](https://www.mdpi.com/applsci/applsci-13-05079/article_deploy/html/images/applsci-13-05079-g001.png)
 
 ### CNN + LSTM approach
 + Image feature extractor: ResNet50
