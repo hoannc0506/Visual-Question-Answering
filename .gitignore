@@ -3,3 +3,4 @@ dataset/*.txt
 __pycache__
 */__pycache__
 wandb
+*.pt

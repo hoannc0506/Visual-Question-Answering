@@ -31,7 +31,7 @@ idx_to_classes = {idx:cls_name for idx, cls_name in enumerate(classes)}
 # create tokenizer, preprocessor
 text_tokenizer = AutoTokenizer.from_pretrained("roberta-base")
 image_preprocessor = ViTImageProcessor.from_pretrained("google/vit-base-patch16-224")
-device = 'cuda:2'
+device = 'cuda:3'
 
 # create datasets
 train_dataset = VisTrans_BERT_Dataset(train_data, classes_to_idx, image_preprocessor, text_tokenizer)
@@ -82,9 +82,6 @@ wandb_logger = wandb.init(
 # train model
 train_losses, val_losses = trainer.fit(model, train_loader, val_loader, criterion, 
                                          optimizer, scheduler, device, epochs, logger=wandb_logger)
-
-df = pd.DataFrame({'train_loss': train_losses, 'val_loss': val_losses})
-df.to_csv("logs/vistrans_roberta_results.csv", index=False)
 
 val_loss, val_acc = trainer.evaluate(model, val_loader, criterion, device)
 
