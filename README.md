@@ -8,13 +8,13 @@
 ![Pipeline](https://www.mdpi.com/applsci/applsci-13-05079/article_deploy/html/images/applsci-13-05079-g001.png)
 
 ### CNN + LSTM approach
-+ Image feature extractor: ResNet50
-+ Text tokenizer: BiLSTM
++ Image Encoder: ResNet50
++ Text Encoder: BiLSTM
 
 
 ### Tranformers approach
-+ Image feature extractor: `Vision Transformer`
-+ Text tokenizer: `RoBERTa base model`
++ Image Encoder: `Vision Transformer`
++ Text Encoder: `RoBERTa base model`
 + Experiments with 2 output layers: `outputs.pooler_output` and `outputs.last_hidden_state[:, 0, :]`
 
 ## Train results
