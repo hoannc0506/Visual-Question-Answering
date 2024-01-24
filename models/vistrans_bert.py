@@ -11,7 +11,9 @@ class VisualEncoder(nn.Module):
     
     def forward(self, x):
         outputs = self.model(x)
-        return outputs.pooler_output
+        # return outputs.pooler_output
+        
+        return outputs.last_hidden_state[:, 0, :]
         
     
 class TextEncoder(nn.Module):
@@ -22,8 +24,9 @@ class TextEncoder(nn.Module):
     def forward(self, x):
         outputs = self.model(x)
         
-        return outputs.pooler_output
-
+        # return outputs.pooler_output
+        return outputs.last_hidden_state[:, 0, :]
+    
 
 class Classifier(nn.Module):
     def __init__(self, 
