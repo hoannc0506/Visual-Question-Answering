@@ -24,9 +24,9 @@
 |----------|----------|----------|
 | ResNet50 + LSTM | 0.5358 | - |
 | VisTrans + RoBERTa (pooler_output) | 0.6690 | 0.6636 |
-| VisTrans + RoBERTa (last_hidden_state output) | **0.6931** | **0.6874** |
+| [VisTrans + RoBERTa (last_hidden_state output)](https://drive.google.com/file/d/1hzeWyj58h8_lDyB-ysD684t_lcHfMQFB/view?usp=sharing) | **0.6931** | **0.6874** |
 
 ## To do
-- [ ] Public models
+- [x] Public models
 - [ ] Inference code
 - [ ] Compare with other models
