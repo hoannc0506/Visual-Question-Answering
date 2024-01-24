@@ -1,0 +1,13 @@
+matplotlib==3.7.4
+pandas==2.0.3
+Pillow==10.2.0
+Requests==2.31.0
+spacy==3.7.2
+timm==0.9.12
+torch==1.13.0+cu116
+torchinfo==1.8.0
+torchtext==0.14.0
+torchvision==0.14.0+cu116
+tqdm==4.66.1
+transformers==4.36.2
+wandb==0.16.2
