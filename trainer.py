@@ -74,6 +74,15 @@ def fit(model, train_loader, val_loader, criterion, optimizer, scheduler, device
         logger.log({"val/loss": train_loss, "val/acc": val_acc})
         logger.log({"train/loss": val_loss})
         
+        # Save checkpoint
+        checkpoint = {
+            'epoch': epoch,
+            'model_state_dict': model.state_dict(),
+            'optimizer_state_dict': optimizer.state_dict(),
+        }
+        
+        torch.save(checkpoint, f'{logger.name}.pt')
+        
         print(f"Epoch {epoch + 1}:\tTrain loss: {train_loss:.4f}\tVal loss: {val_loss:.4f}\tVal accuracy: {val_acc:.4f}")
         
     return train_losses, val_losses
