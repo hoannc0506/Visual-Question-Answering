@@ -18,7 +18,10 @@
 
 ## Train scripts
 ```
-
+python train_vqa_basic_trainer.py \
+--visual-pretrained "google/vit-base-patch16-224" \
+--text-pretrained "roberta-base" \
+--device "cuda:0"
 ```
 
 ## Train results
