@@ -3,8 +3,24 @@ from torch.utils.data import Dataset
 import os
 from PIL import Image
 
+def load_dataset(data_path):
+    data = []
+    lines = open(data_path, 'r').read().strip().split('\n')
+    for line in lines:
+        temp = line.split('\t')
+        qa = temp[1].split('?')
+        
+        answer = qa[2] if len(qa) == 3 else qa[1]
 
-class VisTrans_BERT_Dataset(Dataset):
+        data_sample = {'image_path': temp[0][:-2],
+                    'question': qa[0] + '?',
+                    'answer': answer.strip()}
+        
+        data.append(data_sample)
+
+    return data
+
+class VQADatasetFromPretrained(Dataset):
     def __init__(
         self,
         data,

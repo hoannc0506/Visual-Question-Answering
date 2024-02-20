@@ -13,9 +13,13 @@
 
 
 ### Tranformers approach
-+ Image Encoder: `Vision Transformer`
++ Image Encoder: `Vision Transformer`, `ViTMAE`
 + Text Encoder: `RoBERTa base model`
-+ Experiments with 2 output layers: `outputs.pooler_output` and `outputs.last_hidden_state[:, 0, :]`
+
+## Train scripts
+```
+
+```
 
 ## Train results
 + [Wandb train results](https://wandb.ai/hoannc6/VQA)

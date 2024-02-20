@@ -1,5 +1,6 @@
 import torch
 from tqdm import tqdm
+import os 
 
 def evaluate(model, dataloader, criterion, device):
     model.eval()
@@ -81,7 +82,8 @@ def fit(model, train_loader, val_loader, criterion, optimizer, scheduler, device
             'optimizer_state_dict': optimizer.state_dict(),
         }
         
-        torch.save(checkpoint, f'{logger.name}.pt')
+        os.makedirs('results', exist_ok=True)
+        torch.save(checkpoint, f'results/{logger.name}.pt')
         
         print(f"Epoch {epoch + 1}:\tTrain loss: {train_loss:.4f}\tVal loss: {val_loss:.4f}\tVal accuracy: {val_acc:.4f}")
         

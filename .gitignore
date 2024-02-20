@@ -4,3 +4,6 @@ __pycache__
 */__pycache__
 wandb
 *.pt
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/
+*.zip
