@@ -48,23 +48,26 @@ class VQADatasetFromPretrained(Dataset):
         if self.image_preprocessor:
             img = self.image_preprocessor(images=image, return_tensors="pt")
             img = img.pixel_values.squeeze(0)
+            # print(img.shape)
             
         question = self.data[index].get('question')
         if self.text_tokenizer:
             question = self.text_tokenizer(
                 question,
                 padding="max_length",
-                max_length=self.max_seq_length,
+                # max_length=self.max_seq_length,
                 truncation=True,
                 return_tensors="pt"
                 )
             
             question = question.input_ids.squeeze(0)
+            # print(question.shape)
             
         label = self.data[index].get('answer')
         label = torch.tensor(
             self.classes_to_idx[label],
             dtype=torch.long,
         )
+        
         
         return img, question, label

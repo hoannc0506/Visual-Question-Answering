@@ -3,6 +3,7 @@ import torch.nn as nn
 from transformers import ViTModel
 from transformers import RobertaModel
 
+
 class VisualEncoder(nn.Module):
     def __init__(self):
         super(VisualEncoder, self).__init__()

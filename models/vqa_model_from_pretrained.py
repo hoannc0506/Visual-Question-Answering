@@ -1,6 +1,7 @@
 import torch 
 import torch.nn as nn
 from transformers import AutoTokenizer, AutoModel, AutoImageProcessor
+from transformers import CLIPProcessor, CLIPModel, CLIPImageProcessor, CLIPTokenizerFast
 
 class VisualEncoder(nn.Module):
     def __init__(self, pretrained_name):
@@ -108,29 +109,71 @@ class VQAModelFromPretrained(nn.Module):
         elif classifier_type == 'lstm':
             self.classifier = LSTMClassifier(n_classes=n_classes, fusion_size=self.fusion_dim)
 
+        
             
-    def forward(self, image, text):
-        text_out = self.text_encoder(text)
-        image_out = self.visual_encoder(image)
+    def forward(self, pixel_values, input_ids):
+        text_out = self.text_encoder(input_ids)
+        image_out = self.visual_encoder(pixel_values)
 
         x = torch.cat((text_out, image_out), dim=1)
         x = self.classifier(x)
         
         return x
-    
 
+class CLIPVQA(nn.Module):
+    def __init__(self, 
+                model_id="openai/clip-vit-base-patch32",
+                n_classes=2,
+                classifier_type='lstm'):
+        
+        super(CLIPVQA, self).__init__()
+        self.model = CLIPModel.from_pretrained(model_id)
+        self.image_preprocessor = CLIPImageProcessor.from_pretrained(model_id)
+        self.text_tokenizer = CLIPTokenizerFast.from_pretrained(model_id)
+        
+        self.vision_config = self.model.vision_model.config
+        self.text_config = self.model.text_model.config
+        # self.processor = CLIPProcessor.from_pretrained(model_id)
+
+        self.fusion_dim = self.vision_config.projection_dim + self.text_config.projection_dim
+        
+        if classifier_type == 'linear':
+            self.classifier = LinearClassifier(n_classes=n_classes, fusion_size=self.fusion_dim)
+
+        elif classifier_type == 'lstm':
+            self.classifier = LSTMClassifier(n_classes=n_classes, fusion_size=self.fusion_dim)
+        
+        print(f"freezing {model_id} parameters")
+        for n, p in self.model.named_parameters():
+            p.requires_grad = False
+    
+    def forward(self, pixel_values, input_ids):
+        clip_output = self.model(input_ids, pixel_values)
+
+        x = torch.cat(
+            (clip_output.text_embeds, clip_output.image_embeds), 
+            dim=1
+            )
+        # import pdb;pdb.set_trace()
+        x = self.classifier(x)
+    
+        return x
+    
 if __name__ == '__main__':
     import torchinfo
-    
-    device = "cuda:3"
-    model = VQAModelFromPretrained('facebook/vit-mae-base')
+    from PIL import Image
+    import requests
+     
+    device = "cuda"
+    # model = VQAModelFromPretrained('facebook/vit-mae-base')
+    model = CLIPVQA()
     model = model.to(device)
     
-    # Specify input sizes for both img and text
-    # img_input_size = (1, 3, 224, 224)  # Assuming input size of (batch_size, channels, height, width)
-    # text_input_size = (1, 20) # Assuming input size of (batch_size, sequence_length)
+    import pdb; pdb.set_trace()
+    # config = model.text_encoder.config
+    config = model.text_config
     
-    config = model.text_encoder.config
     input_image = torch.randn(size=(1, 3, 224, 224)).to(device)
-    input_text_ids = torch.randint(0, config.vocab_size, size=(1, 300)).to(device)
-    torchinfo.summary(model, input_data=[input_image, input_text_ids])
+    input_text_ids = torch.randint(0, config.vocab_size, size=(1, 77)).to(device)
+    torchinfo.summary(model, input_data=[input_text_ids, input_image])
+    
